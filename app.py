@@ -145,13 +145,7 @@ def roast_github_repo(url: str, progress=gr.Progress()) -> str:
 
 
 # Create Gradio Interface with improved styling
-with gr.Blocks(
-    title="GitRoast - Brutally Honest GitHub Analysis",
-    theme=gr.themes.Soft(
-        primary_hue="orange",
-        secondary_hue="red",
-    )
-) as demo:
+with gr.Blocks(title="GitRoast - Brutally Honest GitHub Analysis") as demo:
     gr.Markdown("""
     # 🔥 GitRoast - Brutally Honest GitHub Analysis
 
