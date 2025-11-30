@@ -174,22 +174,62 @@ custom_theme = gr.themes.Soft(
 custom_css = """
 .text-center { text-align: center; }
 .output-container { min-height: 400px; }
-/* Ensure input text is always visible with high contrast */
-input[type="text"], textarea, .gr-text-input input {
-    color: #1f2937 !important;
-    background-color: white !important;
-    border: 1px solid #d1d5db !important;
+
+/* CRITICAL: Force input text visibility with multiple selectors */
+input, textarea,
+input[type="text"],
+.gr-box input,
+.gr-text-input input,
+.gr-textbox input,
+label input {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    border: 2px solid #d1d5db !important;
+    font-size: 16px !important;
 }
+
+/* Placeholder text */
+input::placeholder,
+textarea::placeholder {
+    color: #9ca3af !important;
+    opacity: 1 !important;
+}
+
+/* Focus state for better UX */
+input:focus, textarea:focus {
+    outline: 2px solid #f97316 !important;
+    border-color: #f97316 !important;
+}
+
+/* Dark mode support */
 @media (prefers-color-scheme: dark) {
-    input[type="text"], textarea, .gr-text-input input {
-        color: #f3f4f6 !important;
-        background-color: #374151 !important;
-        border: 1px solid #6b7280 !important;
+    input, textarea,
+    input[type="text"],
+    .gr-box input,
+    .gr-text-input input,
+    .gr-textbox input,
+    label input {
+        color: #f9fafb !important;
+        background-color: #1f2937 !important;
+        border: 2px solid #4b5563 !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: #6b7280 !important;
+    }
+
+    input:focus, textarea:focus {
+        border-color: #f97316 !important;
     }
 }
+
 /* Better button visibility */
-.gr-button-primary {
-    background: linear-gradient(to bottom right, #f97316, #ea580c) !important;
+.gr-button-primary,
+button[variant="primary"] {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
 }
 """
 
@@ -283,6 +323,16 @@ This MCP server analyzes GitHub repositories and profiles, then generates hilari
 # Launch with MCP server mode
 if __name__ == "__main__":
     import logging
+    import sys
+
+    # Fix Windows console encoding for Unicode emoji support
+    if sys.platform == "win32":
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+            sys.stderr.reconfigure(encoding='utf-8')
+        except:
+            pass
+
     # Suppress MCP server connection errors from browser access
     logging.getLogger("mcp.server.streamable_http").setLevel(logging.WARNING)
 
