@@ -9,7 +9,7 @@ app_file: app.py
 pinned: false
 tags:
   - mcp
-  - building-mcp-track-consumer
+  - building-mcp-track-creative
   - gradio
   - github
   - ai
@@ -122,8 +122,8 @@ Use GitRoast to analyze the repository facebook/react
 
 ## 🏆 MCP 1st Birthday Hackathon
 
-**Track:** Track 1 - Building MCP (Consumer)
-**Tag:** `building-mcp-track-consumer`
+**Track:** Track 1 - Building MCP (Creative)
+**Tag:** `building-mcp-track-creative`
 
 ### Why GitRoast?
 
@@ -575,4 +575,4 @@ Remember: The best developers can laugh at their commit history while learning f
 
 **Made with 🔥 and ☕ for the MCP 1st Birthday Hackathon**
 
-**Track 1: Building MCP | Tag: `building-mcp-track-consumer`**
+**Track 1: Building MCP | Tag: `building-mcp-track-creative`**
