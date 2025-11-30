@@ -7,6 +7,7 @@ sdk: gradio
 sdk_version: "6.0.0"
 app_file: app.py
 pinned: false
+short_description: Brutally roast GitHub repositories with AI-powered analysis and savage humor via MCP
 tags:
   - mcp
   - building-mcp-track-creative
@@ -23,7 +24,7 @@ license: mit
 
 **Brutally roast GitHub repositories using AI-powered analysis and savage humor.**
 
-Built for the **[MCP 1st Birthday Hackathon](https://huggingface.co/MCP-1st-Birthday)** (Track 1: Building MCP - Consumer) using **Gradio 6**.
+Built for the **[MCP 1st Birthday Hackathon](https://huggingface.co/MCP-1st-Birthday)** (Track 1: Building MCP - Creative) using **Gradio 6**.
 
 [![Gradio](https://img.shields.io/badge/Gradio-6.0-orange)](https://gradio.app/)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io/)
@@ -247,7 +248,7 @@ Use GitRoast to analyze the repository facebook/react
 
 ## 🔑 API Keys (Optional)
 
-This Space works **without API keys**, but you can add them for better results:
+This Space works **with API keys**:
 
 ### GitHub Token
 
