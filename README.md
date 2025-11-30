@@ -4,7 +4,7 @@ emoji: 🔥
 colorFrom: red
 colorTo: yellow
 sdk: gradio
-sdk_version: "6.0.0"
+sdk_version: "6.0.1"
 app_file: app.py
 pinned: false
 short_description: Brutally roast GitHub repos with savage humor
@@ -24,10 +24,10 @@ license: mit
 
 **Brutally roast GitHub repositories using AI-powered analysis and savage humor.**
 
-Built for the **[MCP 1st Birthday Hackathon](https://huggingface.co/MCP-1st-Birthday)** (Track 1: Building MCP - Creative) using **Gradio 6**.
+Built for the **[MCP 1st Birthday Hackathon](https://huggingface.co/MCP-1st-Birthday)** (Track 1: Building MCP - Creative) using **Gradio 6** with a custom-themed, responsive UI.
 
-[![Gradio](https://img.shields.io/badge/Gradio-6.0-orange)](https://gradio.app/)
-[![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io/)
+[![Gradio](https://img.shields.io/badge/Gradio-6.0.1-orange)](https://gradio.app/)
+[![MCP](https://img.shields.io/badge/MCP-1.22.0-blue)](https://modelcontextprotocol.io/)
 [![Python](https://img.shields.io/badge/Python-3.8+-green)](https://python.org/)
 
 ---
@@ -227,8 +227,8 @@ Use GitRoast to analyze the repository facebook/react
 ## 🛠️ Tech Stack
 
 **MCP Integration:**
-- [Gradio 6](https://gradio.app/) - Native MCP server support (`mcp_server=True`)
-- [Model Context Protocol](https://modelcontextprotocol.io/) - Standard protocol compliance
+- [Gradio 6.0.1](https://gradio.app/) - Native MCP server support (`mcp_server=True`)
+- [Model Context Protocol 1.22.0](https://modelcontextprotocol.io/) - Standard protocol compliance
 - Server-Sent Events (SSE) - Real-time communication
 - JSON-RPC - Request/response handling
 
@@ -238,9 +238,16 @@ Use GitRoast to analyze the repository facebook/react
 - Retry logic with exponential backoff
 - Rate limit handling (60/hr → 5000/hr with token)
 
+**UI & Design:**
+- Custom Gradio 6 theme (Soft theme with orange/red gradients)
+- High-contrast text input for perfect visibility
+- Responsive layout with panel variants
+- Dark mode support via CSS media queries
+- Clean, modern interface optimized for readability
+
 **Core Technologies:**
 - Python 3.8+ - Type-safe implementation
-- Gradio 6.0 - Web UI and MCP server
+- Gradio 6.0.1 - Web UI and MCP server
 - `requests` - HTTP client
 - `python-dotenv` - Environment management
 

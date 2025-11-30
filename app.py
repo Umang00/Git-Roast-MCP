@@ -144,6 +144,55 @@ def roast_github_repo(url: str, progress=gr.Progress()) -> str:
         return f"## ❌ Error\n\n**Failed to analyze repository:**\n\n{error_msg}\n\nPlease check:\n- The repository/profile exists and is public\n- You haven't exceeded GitHub rate limits"
 
 
+# Create custom Gradio 6 theme with proper visibility
+custom_theme = gr.themes.Soft(
+    primary_hue="orange",
+    secondary_hue="red",
+    neutral_hue="slate",
+    spacing_size="md",
+    radius_size="md",
+    text_size="md",
+).set(
+    # Ensure text is always visible with high contrast
+    body_text_color="*neutral_900",
+    body_text_color_dark="*neutral_100",
+    # Input text visibility
+    input_background_fill="white",
+    input_background_fill_dark="*neutral_800",
+    input_border_color="*neutral_300",
+    input_border_color_dark="*neutral_600",
+    # Button colors
+    button_primary_background_fill="*primary_500",
+    button_primary_background_fill_hover="*primary_600",
+    button_primary_text_color="white",
+    # Panel background
+    panel_background_fill="*neutral_50",
+    panel_background_fill_dark="*neutral_900",
+)
+
+# CSS for text visibility and styling
+custom_css = """
+.text-center { text-align: center; }
+.output-container { min-height: 400px; }
+/* Ensure input text is always visible with high contrast */
+input[type="text"], textarea, .gr-text-input input {
+    color: #1f2937 !important;
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
+}
+@media (prefers-color-scheme: dark) {
+    input[type="text"], textarea, .gr-text-input input {
+        color: #f3f4f6 !important;
+        background-color: #374151 !important;
+        border: 1px solid #6b7280 !important;
+    }
+}
+/* Better button visibility */
+.gr-button-primary {
+    background: linear-gradient(to bottom right, #f97316, #ea580c) !important;
+}
+"""
+
 # Create Gradio 6 Interface with MCP server support
 with gr.Blocks(
     title="GitRoast - Brutally Honest GitHub Analysis",
@@ -154,12 +203,11 @@ with gr.Blocks(
 
 **Get savagely roasted based on your commit history, documentation, and coding patterns.**
 
-This MCP server analyzes GitHub repositories and profiles, then generates hilariously brutal (but constructive) feedback.""",
-        header_links=True
+This MCP server analyzes GitHub repositories and profiles, then generates hilariously brutal (but constructive) feedback."""
     )
 
-    with gr.Row(equal_height=True):
-        with gr.Column(scale=1, min_width=280, variant="panel"):
+    with gr.Row(equal_height=False):
+        with gr.Column(scale=1, min_width=250, variant="panel"):
             gr.Markdown("""### 📊 What We Analyze
 - Commit patterns & timing
 - Message quality
@@ -173,15 +221,14 @@ This MCP server analyzes GitHub repositories and profiles, then generates hilari
 - Embarrassing achievements
 - Honest suggestions""")
 
-        with gr.Column(scale=2, min_width=400):
+        with gr.Column(scale=3, min_width=500):
             url_input = gr.Textbox(
                 label="GitHub Repository or Username",
-                placeholder="owner/repo, https://github.com/owner/repo, or username",
-                info="Examples: facebook/react, torvalds/linux, or octocat",
+                placeholder="facebook/react, torvalds/linux, or octocat",
+                info="Enter: owner/repo, full GitHub URL, or just a username",
                 lines=1,
-                max_lines=1,
-                autofocus=True,
-                submit_btn=True
+                container=True,
+                show_label=True
             )
 
             analyze_btn = gr.Button(
@@ -191,17 +238,14 @@ This MCP server analyzes GitHub repositories and profiles, then generates hilari
             )
 
             gr.Markdown(
-                "_⚡ Analysis takes 10-30 seconds depending on repository size_",
-                elem_classes=["text-center"]
+                "_⚡ Analysis takes 10-30 seconds depending on repository size_"
             )
 
     gr.Markdown("---")
 
     output = gr.Markdown(
         value="👆 Enter a repository or username above and click the button to get roasted!",
-        line_breaks=True,
-        header_links=True,
-        sanitize_html=True
+        elem_classes=["output-container"]
     )
 
     # Connect the function with Gradio 6 event syntax
@@ -253,6 +297,8 @@ if __name__ == "__main__":
         mcp_server=True,
         server_name=server_name,
         server_port=port,
-        show_error=True
+        show_error=True,
+        theme=custom_theme,
+        css=custom_css
     )
 
