@@ -243,36 +243,52 @@ with gr.Blocks(
 
 **Get savagely roasted based on your commit history, documentation, and coding patterns.**
 
-This MCP server analyzes GitHub repositories and profiles, then generates hilariously brutal (but constructive) feedback."""
+This is an MCP server that brutally analyzes your GitHub work and delivers hilariously constructive feedback. Perfect for developers who can handle the truth about their code!
+
+---
+
+## 📝 How to Use
+
+**Option 1: Repository URL**
+- Paste the full GitHub repository URL (e.g., `https://github.com/username/repo-name`)
+- We'll analyze commits, code patterns, docs, and project structure
+
+**Option 2: Username Only**
+- Enter just a GitHub username (e.g., `octocat`)
+- We'll analyze their entire profile and recent activity
+
+Just pick one option and click **"Analyze & Roast"** - no need to fill both!
+""")
     )
 
     with gr.Row(equal_height=False):
         with gr.Column(scale=1, min_width=250, variant="panel"):
-            gr.Markdown("""### 📊 What We Analyze
-- Commit patterns & timing
-- Message quality
-- Documentation
-- Repository metadata
-- Coding habits
+            gr.Markdown("""### 🎯 Quick Examples
+**Repository:** `facebook/react`
+**Username:** `torvalds`
+**Full URL:** `https://github.com/microsoft/vscode`
 
-### 🎯 You'll Get
-- Savage roasts
-- Letter grade
-- Embarrassing achievements
-- Honest suggestions""")
+---
+
+### 🔍 What We Analyze
+- Commits & timing patterns
+- Code quality & style
+- Documentation completeness
+- Repository structure
+- Coding habits & hygiene""")
 
         with gr.Column(scale=3, min_width=500):
             url_input = gr.Textbox(
-                label="GitHub Repository or Username",
-                placeholder="facebook/react, torvalds/linux, or octocat",
-                info="Enter: owner/repo, full GitHub URL, or just a username",
+                label="🔍 Enter Repository URL or Username",
+                placeholder="e.g., facebook/react or torvalds",
+                info="Works with: Full URL, owner/repo, or just username",
                 lines=1,
                 container=True,
                 show_label=True
             )
 
             analyze_btn = gr.Button(
-                value="🔥 Roast This Repo!",
+                value="🔥 Analyze & Roast",
                 variant="primary",
                 size="lg"
             )
@@ -284,7 +300,7 @@ This MCP server analyzes GitHub repositories and profiles, then generates hilari
     gr.Markdown("---")
 
     output = gr.Markdown(
-        value="👆 Enter a repository or username above and click the button to get roasted!",
+        value="👆 Enter a repository URL or username above and click **Analyze & Roast** to get brutally honest feedback!",
         elem_classes=["output-container"]
     )
 
