@@ -4,7 +4,7 @@ emoji: 🔥
 colorFrom: red
 colorTo: yellow
 sdk: gradio
-sdk_version: "4.44.1"
+sdk_version: "6.0.0"
 app_file: app.py
 pinned: false
 short_description: Brutally roast GitHub repos with savage humor
@@ -24,9 +24,9 @@ license: mit
 
 **Brutally roast GitHub repositories using AI-powered analysis and savage humor.**
 
-Built for the **[MCP 1st Birthday Hackathon](https://huggingface.co/MCP-1st-Birthday)** (Track 1: Building MCP - Creative) using **Gradio 4.x** with stable MCP support and a custom-themed, responsive UI.
+Built for the **[MCP 1st Birthday Hackathon](https://huggingface.co/MCP-1st-Birthday)** (Track 1: Building MCP - Creative) using **Gradio 6** with native MCP support and a custom-themed, responsive UI.
 
-[![Gradio](https://img.shields.io/badge/Gradio-4.44.1-orange)](https://gradio.app/)
+[![Gradio](https://img.shields.io/badge/Gradio-6.0.0-orange)](https://gradio.app/)
 [![MCP](https://img.shields.io/badge/MCP-1.22.0-blue)](https://modelcontextprotocol.io/)
 [![Python](https://img.shields.io/badge/Python-3.8+-green)](https://python.org/)
 

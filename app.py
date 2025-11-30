@@ -144,7 +144,7 @@ def roast_github_repo(url: str, progress=gr.Progress()) -> str:
         return f"## ❌ Error\n\n**Failed to analyze repository:**\n\n{error_msg}\n\nPlease check:\n- The repository/profile exists and is public\n- You haven't exceeded GitHub rate limits"
 
 
-# Create custom Gradio 4.x theme with proper visibility
+# Create custom Gradio 6 theme with proper visibility
 custom_theme = gr.themes.Soft(
     primary_hue="orange",
     secondary_hue="red",
@@ -233,12 +233,10 @@ button[variant="primary"] {
 }
 """
 
-# Create Gradio 4.x Interface with MCP server support
+# Create Gradio 6 Interface with MCP server support
 with gr.Blocks(
     title="GitRoast - Brutally Honest GitHub Analysis",
-    fill_height=True,
-    theme=custom_theme,
-    css=custom_css
+    fill_height=True
 ) as demo:
     gr.Markdown(
         """# 🔥 GitRoast - Brutally Honest GitHub Analysis
@@ -349,6 +347,8 @@ if __name__ == "__main__":
         mcp_server=True,
         server_name=server_name,
         server_port=port,
-        show_error=True
+        show_error=True,
+        theme=custom_theme,
+        css=custom_css
     )
 
