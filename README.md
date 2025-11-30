@@ -4,7 +4,7 @@ emoji: 🔥
 colorFrom: red
 colorTo: yellow
 sdk: gradio
-sdk_version: "6.0.1"
+sdk_version: "4.44.1"
 app_file: app.py
 pinned: false
 short_description: Brutally roast GitHub repos with savage humor
@@ -24,9 +24,9 @@ license: mit
 
 **Brutally roast GitHub repositories using AI-powered analysis and savage humor.**
 
-Built for the **[MCP 1st Birthday Hackathon](https://huggingface.co/MCP-1st-Birthday)** (Track 1: Building MCP - Creative) using **Gradio 6** with a custom-themed, responsive UI.
+Built for the **[MCP 1st Birthday Hackathon](https://huggingface.co/MCP-1st-Birthday)** (Track 1: Building MCP - Creative) using **Gradio 4.x** with stable MCP support and a custom-themed, responsive UI.
 
-[![Gradio](https://img.shields.io/badge/Gradio-6.0.1-orange)](https://gradio.app/)
+[![Gradio](https://img.shields.io/badge/Gradio-4.44.1-orange)](https://gradio.app/)
 [![MCP](https://img.shields.io/badge/MCP-1.22.0-blue)](https://modelcontextprotocol.io/)
 [![Python](https://img.shields.io/badge/Python-3.8+-green)](https://python.org/)
 
@@ -131,7 +131,7 @@ Use GitRoast to analyze the repository facebook/react
 ✅ **Novel MCP Use Case** - First MCP server for code roasting
 ✅ **Google Gemini Integration** - Sponsor technology for AI roasts
 ✅ **Educational + Entertaining** - Learn from brutal feedback
-✅ **Production-Ready** - Built with Gradio 6 native MCP support
+✅ **Production-Ready** - Built with Gradio 4.x stable MCP support
 ✅ **Universal Compatibility** - Works with any MCP client
 
 ### What Makes It Special
@@ -148,8 +148,8 @@ Use GitRoast to analyze the repository facebook/react
 | Criteria | How GitRoast Delivers |
 |----------|----------------------|
 | **Completeness** | ✅ HF Space + Social Post + Documentation + Demo Video |
-| **Design/UI-UX** | ✅ Clean Gradio 6 interface, intuitive workflow |
-| **Functionality** | ✅ Native Gradio 6 MCP, AI integration, dual modes |
+| **Design/UI-UX** | ✅ Clean Gradio 4.x interface, intuitive workflow |
+| **Functionality** | ✅ Stable Gradio 4.x MCP, AI integration, dual modes |
 | **Creativity** | ✅ Novel concept: roasting code with AI humor |
 | **Documentation** | ✅ Comprehensive README + demo video |
 | **Real-world Impact** | ✅ Educational feedback for developers |
@@ -227,7 +227,7 @@ Use GitRoast to analyze the repository facebook/react
 ## 🛠️ Tech Stack
 
 **MCP Integration:**
-- [Gradio 6.0.1](https://gradio.app/) - Native MCP server support (`mcp_server=True`)
+- [Gradio 4.44.1](https://gradio.app/) - Stable MCP server support (`mcp_server=True`)
 - [Model Context Protocol 1.22.0](https://modelcontextprotocol.io/) - Standard protocol compliance
 - Server-Sent Events (SSE) - Real-time communication
 - JSON-RPC - Request/response handling
@@ -239,7 +239,7 @@ Use GitRoast to analyze the repository facebook/react
 - Rate limit handling (60/hr → 5000/hr with token)
 
 **UI & Design:**
-- Custom Gradio 6 theme (Soft theme with orange/red gradients)
+- Custom Gradio 4.x theme (Soft theme with orange/red gradients)
 - High-contrast text input for perfect visibility
 - Responsive layout with panel variants
 - Dark mode support via CSS media queries
@@ -247,7 +247,7 @@ Use GitRoast to analyze the repository facebook/react
 
 **Core Technologies:**
 - Python 3.8+ - Type-safe implementation
-- Gradio 6.0.1 - Web UI and MCP server
+- Gradio 4.44.1 - Web UI and MCP server
 - `requests` - HTTP client
 - `python-dotenv` - Environment management
 
@@ -426,7 +426,7 @@ Connect to: `http://localhost:7860/gradio_api/mcp/` using SSE transport
 ┌─────────────────────┐
 │  Gradio MCP Server  │
 │  (app.py)           │
-│  - Native Gradio 6  │
+│  - Stable Gradio 4.x │
 │  - mcp_server=True  │
 └──────────┬──────────┘
            │
@@ -449,7 +449,7 @@ Connect to: `http://localhost:7860/gradio_api/mcp/` using SSE transport
 
 **Key Design Decisions:**
 
-1. **Native Gradio 6 MCP** - No custom bridge needed
+1. **Stable Gradio 4.x MCP** - Reliable implementation
 2. **Clean Separation** - UI (app.py) + Logic (logic.py)
 3. **Type Safety** - Full type hints for MCP compatibility
 4. **Smart Fallback** - Template roasts if AI fails

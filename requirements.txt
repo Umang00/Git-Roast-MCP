@@ -1,4 +1,4 @@
-gradio[mcp]>=6.0.0
+gradio[mcp]==4.44.1
 requests>=2.31.0
 google-generativeai>=0.3.0
 python-dotenv>=1.0.0
