@@ -147,93 +147,110 @@ def fetch_github_api(endpoint: str, token: Optional[str] = None) -> Dict[str, An
 def get_all_user_repos(username: str, token: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Fetch all public repositories for a user.
-    
+
     Args:
         username: GitHub username
         token: Optional GitHub token
-        
+
     Returns:
         List of repository data
     """
     repos = []
     page = 1
     per_page = 100
-    
+
     while True:
         try:
             response = fetch_github_api(
                 f'/users/{username}/repos?per_page={per_page}&page={page}&sort=updated&direction=desc',
                 token
             )
-            
+
+            # FIX: Handle None response
             if not response:
                 break
-            
+
+            # FIX: Ensure response is a list
+            if not isinstance(response, list):
+                print(f"Unexpected response type: {type(response)}")
+                break
+
             # Filter out forks (optional - analyze own repos only)
-            own_repos = [repo for repo in response if not repo.get('fork', False)]
+            # FIX: Handle None repo items in list
+            own_repos = [repo for repo in response if repo and not repo.get('fork', False)]
             repos.extend(own_repos)
-            
+
             if len(response) < per_page:
                 break
             page += 1
         except Exception as e:
             print(f"Error fetching repos page {page}: {e}")
             break
-    
+
     return repos
 
 
 def get_all_commits(owner: str, repo: str, token: Optional[str] = None, max_commits: int = 1000) -> List[Dict[str, Any]]:
     """
     Fetch all commits from a repository (up to max_commits).
-    
+
     Args:
         owner: Repository owner
         repo: Repository name
         token: Optional GitHub token
         max_commits: Maximum number of commits to fetch
-        
+
     Returns:
         List of commit data
     """
     commits = []
     page = 1
     per_page = 100
-    
+
     while len(commits) < max_commits:
         try:
             response = fetch_github_api(
                 f'/repos/{owner}/{repo}/commits?per_page={per_page}&page={page}',
                 token
             )
-            
+
+            # FIX: Handle None response
             if not response:
                 break
-            
+
+            # FIX: Ensure response is a list
+            if not isinstance(response, list):
+                print(f"Unexpected response type: {type(response)}")
+                break
+
             commits.extend(response)
-            
+
             if len(response) < per_page:
                 break
             page += 1
         except Exception as e:
             print(f"Error fetching commits page {page}: {e}")
             break
-    
+
     return commits[:max_commits]
 
 
 def analyze_commits(commits: List[Dict[str, Any]], owner: str, repo: str) -> Dict[str, Any]:
     """
     Analyze commits and generate statistics.
-    
+
     Args:
         commits: List of commit data from GitHub API
         owner: Repository owner
         repo: Repository name
-        
+
     Returns:
         Dictionary with commit statistics
     """
+    # FIX: Add null checking before calling len()
+    if not commits:
+        commits = []
+
     stats = {
         'totalCommits': len(commits),
         'authors': set(),
@@ -254,56 +271,67 @@ def analyze_commits(commits: List[Dict[str, Any]], owner: str, repo: str) -> Dic
         'suspiciousPatterns': [],
         'recentCommits': commits[:10] if commits else [],
         'repositoryInfo': {
-            'owner': owner,
-            'repo': repo,
-            'fullName': f'{owner}/{repo}',
+            'owner': owner or '',
+            'repo': repo or '',
+            'fullName': f'{owner or ""}/{repo or ""}',
         },
     }
-    
+
     # Analyze each commit
     for commit in commits:
-        commit_data = commit.get('commit', {})
-        author_data = commit_data.get('author', {})
-        date_str = author_data.get('date', '')
-        
+        # FIX: Ensure commit is not None and has required structure
+        if not commit:
+            continue
+
+        commit_data = commit.get('commit') or {}
+        author_data = commit_data.get('author') or {}
+        date_str = author_data.get('date') or ''
+
+        # FIX: Skip if no date (invalid commit)
+        if not date_str:
+            continue
+
         try:
             date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
             # Use UTC time
             hour = date.hour
             day = date.weekday()  # 0 = Monday, 6 = Sunday
-            message = commit_data.get('message', '').split('\n')[0]  # First line only
-            author = author_data.get('name', '')
-            
+
+            # FIX: Handle None message
+            message = commit_data.get('message') or ''
+            message = message.split('\n')[0] if message else ''  # First line only
+            author = author_data.get('name') or ''
+
             stats['authors'].add(author)
             stats['commitMessages'].append(message)
             stats['commitHours'].append(hour)
             stats['commitDays'].append(day)
             stats['commitsByHour'][hour] = stats['commitsByHour'].get(hour, 0) + 1
             stats['commitsByDayOfWeek'][day] = stats['commitsByDayOfWeek'].get(day, 0) + 1
-            
+
             # Check for late night commits (11 PM to 5 AM)
             if hour >= 23 or hour < 5:
                 stats['lateNightCommits'] += 1
-            
+
             # Check for weekend commits (Saturday=5, Sunday=6)
             if day == 5 or day == 6:
                 stats['weekendCommits'] += 1
-            
+
             # Analyze commit messages
             message_length = len(message)
             if message_length <= 3:
                 stats['singleCharMessages'] += 1
-            
+
             message_lower = message.lower()
             if 'fix' in message_lower:
                 stats['fixCommits'] += 1
-            
+
             if re.search(r'wip|work in progress|todo', message_lower):
                 stats['wipCommits'] += 1
-            
+
             if 'merge' in message_lower:
                 stats['mergeCommits'] += 1
-            
+
             # Track message lengths
             if not stats['shortestMessage'] or message_length < len(stats['shortestMessage']):
                 stats['shortestMessage'] = message
@@ -351,16 +379,20 @@ def analyze_commits(commits: List[Dict[str, Any]], owner: str, repo: str) -> Dic
 def analyze_readme(content: str) -> Dict[str, Any]:
     """
     Analyze README content for quality and completeness.
-    
+
     Args:
         content: README content
-        
+
     Returns:
         Dictionary with README analysis
     """
+    # FIX: Handle None content
     if not content:
         return {'exists': False}
-    
+
+    # FIX: Ensure content is a string
+    content = str(content) if content else ''
+
     analysis = {
         'exists': True,
         'length': len(content),
@@ -376,7 +408,7 @@ def analyze_readme(content: str) -> Dict[str, Any]:
         'lineCount': len(content.split('\n')),
         'isEmpty': len(content.strip()) < 50,
     }
-    
+
     # Categorize README quality
     if analysis['isEmpty']:
         analysis['quality'] = 'worthless'
@@ -388,60 +420,76 @@ def analyze_readme(content: str) -> Dict[str, Any]:
         analysis['quality'] = 'minimal'
     else:
         analysis['quality'] = 'decent'
-    
+
     return analysis
 
 
 def analyze_repo_metadata(repo_info: Dict[str, Any]) -> Dict[str, Any]:
     """
     Analyze repository metadata (description, topics, etc.).
-    
+
     Args:
         repo_info: Repository data from GitHub API
-        
+
     Returns:
         Dictionary with metadata analysis
     """
+    # FIX: Handle None repo_info
+    if not repo_info:
+        repo_info = {}
+
+    # FIX: Ensure description is not None before calling len()
+    description = repo_info.get('description') or ''
+    topics = repo_info.get('topics') or []
+    name = repo_info.get('name') or ''
+    language = repo_info.get('language') or ''
+
+    # FIX: Handle license which can be None or a dict
+    license_obj = repo_info.get('license')
+    license_name = 'None'
+    if license_obj and isinstance(license_obj, dict):
+        license_name = license_obj.get('name') or 'None'
+
     analysis = {
-        'name': repo_info.get('name', ''),
-        'description': repo_info.get('description', ''),
-        'hasDescription': bool(repo_info.get('description')),
-        'descriptionLength': len(repo_info.get('description', '')),
-        'stars': repo_info.get('stargazers_count', 0),
-        'forks': repo_info.get('forks_count', 0),
-        'watchers': repo_info.get('watchers_count', 0),
-        'openIssues': repo_info.get('open_issues_count', 0),
-        'hasTopics': bool(repo_info.get('topics')) and len(repo_info.get('topics', [])) > 0,
-        'topicsCount': len(repo_info.get('topics', [])),
-        'topics': repo_info.get('topics', []),
-        'hasLicense': bool(repo_info.get('license')),
-        'license': repo_info.get('license', {}).get('name', 'None') if repo_info.get('license') else 'None',
-        'language': repo_info.get('language'),
-        'isArchived': repo_info.get('archived', False),
-        'isTemplate': repo_info.get('is_template', False),
-        'hasWiki': repo_info.get('has_wiki', False),
-        'hasPages': repo_info.get('has_pages', False),
+        'name': name,
+        'description': description,
+        'hasDescription': bool(description),
+        'descriptionLength': len(description),
+        'stars': repo_info.get('stargazers_count') or 0,
+        'forks': repo_info.get('forks_count') or 0,
+        'watchers': repo_info.get('watchers_count') or 0,
+        'openIssues': repo_info.get('open_issues_count') or 0,
+        'hasTopics': bool(topics) and len(topics) > 0,
+        'topicsCount': len(topics),
+        'topics': topics,
+        'hasLicense': bool(license_obj),
+        'license': license_name,
+        'language': language,
+        'isArchived': repo_info.get('archived') or False,
+        'isTemplate': repo_info.get('is_template') or False,
+        'hasWiki': repo_info.get('has_wiki') or False,
+        'hasPages': repo_info.get('has_pages') or False,
         'hasIssues': repo_info.get('has_issues', True),
-        'hasProjects': repo_info.get('has_projects', False),
-        'defaultBranch': repo_info.get('default_branch', 'main'),
-        'createdAt': repo_info.get('created_at', ''),
-        'updatedAt': repo_info.get('updated_at', ''),
-        'pushedAt': repo_info.get('pushed_at', ''),
+        'hasProjects': repo_info.get('has_projects') or False,
+        'defaultBranch': repo_info.get('default_branch') or 'main',
+        'createdAt': repo_info.get('created_at') or '',
+        'updatedAt': repo_info.get('updated_at') or '',
+        'pushedAt': repo_info.get('pushed_at') or '',
     }
-    
+
     # Categorize repo name quality
-    name = analysis['name'].lower()
-    if re.search(r'test|temp|untitled|new|asdf|foo|bar|example', name):
+    name_lower = name.lower()
+    if re.search(r'test|temp|untitled|new|asdf|foo|bar|example', name_lower):
         analysis['nameQuality'] = 'placeholder_garbage'
-    elif re.search(r'\d{5,}', name):
+    elif re.search(r'\d{5,}', name_lower):
         analysis['nameQuality'] = 'random_numbers'
-    elif len(analysis['name']) < 3:
+    elif len(name) < 3:
         analysis['nameQuality'] = 'too_short'
-    elif len(analysis['name']) > 50:
+    elif len(name) > 50:
         analysis['nameQuality'] = 'essay'
     else:
         analysis['nameQuality'] = 'acceptable'
-    
+
     # Categorize description quality
     if not analysis['hasDescription']:
         analysis['descriptionQuality'] = 'nonexistent'
@@ -451,53 +499,61 @@ def analyze_repo_metadata(repo_info: Dict[str, Any]) -> Dict[str, Any]:
         analysis['descriptionQuality'] = 'lazy'
     else:
         analysis['descriptionQuality'] = 'decent'
-    
+
     return analysis
 
 
 def analyze_github_repo(owner: str, repo: str, token: Optional[str] = None) -> Dict[str, Any]:
     """
     Analyze a GitHub repository using the GitHub API.
-    
+
     Args:
         owner: Repository owner
         repo: Repository name
         token: Optional GitHub personal access token
-        
+
     Returns:
         Dictionary with repository analysis statistics
     """
     try:
         # Get repository metadata
         repo_data = fetch_github_api(f'/repos/{owner}/{repo}', token)
-        
+
+        # FIX: Handle None repo_data
+        if not repo_data:
+            raise Exception('Repository data not found')
+
         # Get commits
         commits = get_all_commits(owner, repo, token)
-        
+
         if not commits:
             raise Exception('No commits found in repository')
-        
+
         # Get README content
         readme_content = None
         readme_stats = None
         try:
             readme_data = fetch_github_api(f'/repos/{owner}/{repo}/readme', token)
-            readme_content = base64.b64decode(readme_data.get('content', '')).decode('utf-8')
-            readme_stats = analyze_readme(readme_content)
+            # FIX: Handle None readme_data or missing content
+            if readme_data and readme_data.get('content'):
+                readme_content = base64.b64decode(readme_data.get('content', '')).decode('utf-8')
+                readme_stats = analyze_readme(readme_content)
+            else:
+                readme_stats = {'exists': False}
         except Exception:
             print('No README found or failed to fetch')
             readme_stats = {'exists': False}
-        
+
         # Analyze repository metadata
         repo_metadata = analyze_repo_metadata(repo_data)
-        
+
         # Analyze the commits
         stats = analyze_commits(commits, owner, repo)
-        
+
         # Add README and metadata analysis to stats
         stats['readmeAnalysis'] = readme_stats
         stats['repoMetadata'] = repo_metadata
-        
+
         return stats
     except Exception as e:
         error_msg = str(e)
@@ -511,77 +567,88 @@ def analyze_github_repo(owner: str, repo: str, token: Optional[str] = None) -> D
 def analyze_github_profile(username: str, token: Optional[str] = None) -> Dict[str, Any]:
     """
     Analyze a GitHub user's entire profile (all public repositories).
-    
+
     Args:
         username: GitHub username
         token: Optional GitHub personal access token
-        
+
     Returns:
         Dictionary with profile analysis statistics
     """
     try:
         # Verify user exists
         user_data = fetch_github_api(f'/users/{username}', token)
-        
+
+        # FIX: Handle None user_data
+        if not user_data:
+            raise Exception('User data not found')
+
         # Get all public repositories
         repos = get_all_user_repos(username, token)
-        
+
         if not repos:
             raise Exception('No public repositories found for this user')
-        
+
         print(f"Found {len(repos)} repositories for {username}")
-        
+
         # Collect commits from all repos (limit to avoid rate limits)
         all_commits = []
         repo_stats = []
         max_repos_to_analyze = 20
         repos_to_analyze = repos[:max_repos_to_analyze]
-        
+
         for repo in repos_to_analyze:
+            # FIX: Handle None repo or missing name
+            if not repo or not repo.get('name'):
+                continue
+
             try:
-                print(f"Analyzing repo: {repo['name']}...")
-                commits = get_all_commits(username, repo['name'], token, 100)
-                
+                repo_name = repo.get('name') or ''
+                print(f"Analyzing repo: {repo_name}...")
+                commits = get_all_commits(username, repo_name, token, 100)
+
                 if commits:
+                    # FIX: Ensure commits are valid before extending
                     all_commits.extend([{
                         **c,
-                        'repoName': repo['name']
-                    } for c in commits])
-                    
+                        'repoName': repo_name
+                    } for c in commits if c])
+
                     repo_stats.append({
-                        'name': repo['name'],
+                        'name': repo_name,
                         'commits': len(commits),
-                        'stars': repo.get('stargazers_count', 0),
-                        'language': repo.get('language'),
+                        'stars': repo.get('stargazers_count') or 0,
+                        'language': repo.get('language') or '',
                     })
             except Exception as e:
-                print(f"Skipping repo {repo['name']}: {e}")
+                print(f"Skipping repo {repo.get('name', 'unknown')}: {e}")
                 continue
-        
+
         if not all_commits:
             raise Exception('No commits found across all repositories')
-        
+
         print(f"Total commits collected: {len(all_commits)}")
-        
+
         # Analyze combined commits
         stats = analyze_commits(all_commits, username, 'profile')
-        
+
         # Add profile-specific metadata
+        # FIX: Handle None values from user_data
         stats['repositoryInfo'] = {
             'username': username,
             'type': 'profile',
             'fullName': username,
             'totalRepos': len(repos),
             'analyzedRepos': len(repos_to_analyze),
-            'publicRepos': user_data.get('public_repos', 0),
-            'followers': user_data.get('followers', 0),
-            'following': user_data.get('following', 0),
-            'profileUrl': user_data.get('html_url', ''),
-            'avatarUrl': user_data.get('avatar_url', ''),
-            'bio': user_data.get('bio', ''),
-            'topRepos': sorted(repo_stats, key=lambda x: x['commits'], reverse=True)[:5],
+            'publicRepos': user_data.get('public_repos') or 0,
+            'followers': user_data.get('followers') or 0,
+            'following': user_data.get('following') or 0,
+            'profileUrl': user_data.get('html_url') or '',
+            'avatarUrl': user_data.get('avatar_url') or '',
+            'bio': user_data.get('bio') or '',
+            'topRepos': sorted(repo_stats, key=lambda x: x['commits'], reverse=True)[:5] if repo_stats else [],
         }
-        
+
         return stats
     except Exception as e:
         error_msg = str(e)
@@ -844,14 +911,16 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
         suggestions.append('Learn to use words. Full words. In complete sentences.')
     
     # Activity patterns
-    commits_by_hour = stats.get('commitsByHour', {})
-    commits_by_day = stats.get('commitsByDayOfWeek', {})
+    # FIX: Handle None or empty dicts
+    commits_by_hour = stats.get('commitsByHour') or {}
+    commits_by_day = stats.get('commitsByDayOfWeek') or {}
     if commits_by_hour and commits_by_day:
+        # FIX: Handle empty dicts by providing defaults
         most_active_hour = max(commits_by_hour.items(), key=lambda x: x[1])[0] if commits_by_hour else 12
         most_active_day = max(commits_by_day.items(), key=lambda x: x[1])[0] if commits_by_day else 1
         day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         day_name = day_names[most_active_day] if 0 <= most_active_day < 7 else 'Unknown'
-        
+
         roasts.append({
             'emoji': '⏰',
             'title': 'Your Coding Schedule Screams "Red Flags"',
@@ -892,7 +961,8 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
         })
     
     # README Analysis
-    readme_analysis = stats.get('readmeAnalysis')
+    # FIX: Handle None readme_analysis
+    readme_analysis = stats.get('readmeAnalysis') or {}
     if readme_analysis:
         if not readme_analysis.get('exists'):
             roasts.append({
@@ -904,7 +974,7 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
             suggestions.append('Write a README. Any README. Literally anything is better than nothing.')
             suggestions.append('If you can\'t explain your project in a README, maybe it shouldn\'t exist.')
         elif readme_analysis.get('quality') in ['worthless', 'pathetic']:
-            word_count = readme_analysis.get('wordCount', 0)
+            word_count = readme_analysis.get('wordCount') or 0
             roasts.append({
                 'emoji': '📝',
                 'title': 'README: Technically Exists, Practically Useless',
@@ -913,7 +983,7 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
             })
             suggestions.append('Your README should explain WHAT, WHY, and HOW. Yours explains nothing.')
         elif readme_analysis.get('quality') in ['lazy', 'minimal']:
-            word_count = readme_analysis.get('wordCount', 0)
+            word_count = readme_analysis.get('wordCount') or 0
             missing = []
             if not readme_analysis.get('hasInstallSection'):
                 missing.append('installation')
@@ -921,8 +991,8 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
                 missing.append('usage examples')
             if not readme_analysis.get('hasLicenseSection'):
                 missing.append('license')
-            
-            code_blocks = readme_analysis.get('codeBlockCount', 0)
+
+            code_blocks = readme_analysis.get('codeBlockCount') or 0
             roasts.append({
                 'emoji': '📋',
                 'title': 'Half-Assed Documentation Expert',
@@ -933,10 +1003,11 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
             suggestions.append('Usage examples aren\'t optional. They\'re mandatory.')
     
     # Repository Metadata Analysis
-    repo_metadata = stats.get('repoMetadata')
+    # FIX: Handle None repo_metadata
+    repo_metadata = stats.get('repoMetadata') or {}
     if repo_metadata:
         if repo_metadata.get('nameQuality') == 'placeholder_garbage':
-            repo_name = repo_metadata.get('name', '')
+            repo_name = repo_metadata.get('name') or ''
             roasts.append({
                 'emoji': '🗑️',
                 'title': 'Repo Name: Placeholder Trash',
@@ -944,7 +1015,7 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
                 'severity': 4
             })
             suggestions.append('Rename your repo to something that doesn\'t sound like a placeholder.')
-        
+
         if repo_metadata.get('descriptionQuality') == 'nonexistent':
             roasts.append({
                 'emoji': '🏷️',
@@ -954,8 +1025,8 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
             })
             suggestions.append('Add a repo description. One sentence. That\'s all we\'re asking.')
         elif repo_metadata.get('descriptionQuality') in ['pathetic', 'lazy']:
-            desc = repo_metadata.get('description', '')
-            desc_len = repo_metadata.get('descriptionLength', 0)
+            desc = repo_metadata.get('description') or ''
+            desc_len = repo_metadata.get('descriptionLength') or 0
             roasts.append({
                 'emoji': '💬',
                 'title': 'Repo Description: Aggressively Unhelpful',
@@ -963,7 +1034,7 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
                 'severity': 3
             })
             suggestions.append('Describe WHAT your project does and WHY it exists.')
-        
+
         if not repo_metadata.get('hasLicense') and total_commits > 20:
             roasts.append({
                 'emoji': '⚖️',
@@ -972,8 +1043,8 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
                 'severity': 3
             })
             suggestions.append('Add a license. MIT is fine. Just pick something.')
-        
-        if not repo_metadata.get('hasTopics') or repo_metadata.get('topicsCount', 0) == 0:
+
+        if not repo_metadata.get('hasTopics') or (repo_metadata.get('topicsCount') or 0) == 0:
             roasts.append({
                 'emoji': '🏷️',
                 'title': 'Zero Topics - SEO Failure',
@@ -981,15 +1052,15 @@ def generate_template_roast(stats: Dict[str, Any]) -> Dict[str, Any]:
                 'severity': 2
             })
             suggestions.append('Add topics/tags. Make your repo discoverable.')
-        
-        stars = repo_metadata.get('stars', 0)
+
+        stars = repo_metadata.get('stars') or 0
         if stars == 0 and total_commits > 50:
             achievements.append({
                 'emoji': '⭐',
                 'title': 'Zero Stars - Universally Ignored',
                 'description': f"{total_commits} commits, 0 stars. Nobody cares. Not even your mom starred this."
             })
-        
+
         if repo_metadata.get('isArchived'):
             achievements.append({
                 'emoji': '⚰️',
@@ -1038,65 +1109,79 @@ def distill_stats_for_prompt(stats: Dict[str, Any]) -> Dict[str, Any]:
     Distill stats to include meaningful examples for good roasts.
     Balances context quality with payload size.
     """
-    messages = stats.get('commitMessages', [])
+    # FIX: Handle None stats
+    if not stats:
+        stats = {}
+
+    # FIX: Handle None or empty messages list
+    messages = stats.get('commitMessages') or []
     sample_messages = []
-    
+
     if messages:
         # Recent commits (first 10)
         sample_messages.extend(messages[:min(10, len(messages))])
-        
+
         # If more than 10 commits, add diverse samples
         if len(messages) > 10:
             # Middle commits (5 samples from middle third)
             middle_start = len(messages) // 3
             sample_messages.extend(messages[middle_start:middle_start + 5])
-            
+
             # Oldest commits (last 5)
             sample_messages.extend(messages[-5:])
-    
+
     # Deduplicate while preserving order
+    # FIX: Handle None messages in list
     unique_samples = []
     seen = set()
     for msg in sample_messages:
-        if msg not in seen:
+        if msg and msg not in seen:
             unique_samples.append(msg)
             seen.add(msg)
-    
+
     return {
         'analysisType': stats.get('analysisType'),
-        'repositoryInfo': stats.get('repositoryInfo'),
-        'totalCommits': stats.get('totalCommits', 0),
-        'lateNightCommits': stats.get('lateNightCommits', 0),
-        'lateNightPercentage': stats.get('lateNightPercentage', 0),
-        'weekendCommits': stats.get('weekendCommits', 0),
-        'weekendPercentage': stats.get('weekendPercentage', 0),
-        'singleCharMessages': stats.get('singleCharMessages', 0),
-        'fixCommits': stats.get('fixCommits', 0),
-        'wipCommits': stats.get('wipCommits', 0),
-        'mergeCommits': stats.get('mergeCommits', 0),
-        'averageMessageLength': stats.get('averageMessageLength', 0),
-        'shortestMessage': stats.get('shortestMessage'),
-        'longestMessage': stats.get('longestMessage'),
+        'repositoryInfo': stats.get('repositoryInfo') or {},
+        'totalCommits': stats.get('totalCommits') or 0,
+        'lateNightCommits': stats.get('lateNightCommits') or 0,
+        'lateNightPercentage': stats.get('lateNightPercentage') or 0,
+        'weekendCommits': stats.get('weekendCommits') or 0,
+        'weekendPercentage': stats.get('weekendPercentage') or 0,
+        'singleCharMessages': stats.get('singleCharMessages') or 0,
+        'fixCommits': stats.get('fixCommits') or 0,
+        'wipCommits': stats.get('wipCommits') or 0,
+        'mergeCommits': stats.get('mergeCommits') or 0,
+        'averageMessageLength': stats.get('averageMessageLength') or 0,
+        'shortestMessage': stats.get('shortestMessage') or '',
+        'longestMessage': stats.get('longestMessage') or '',
         'sampleCommitMessages': unique_samples,
-        'suspiciousPatterns': stats.get('suspiciousPatterns', []),
-        'authorCount': stats.get('authorCount', 0),
-        'commitsByDayOfWeek': stats.get('commitsByDayOfWeek', {}),
-        'commitsByHour': stats.get('commitsByHour', {}),
-        'readmeAnalysis': stats.get('readmeAnalysis'),
-        'repoMetadata': stats.get('repoMetadata'),
+        'suspiciousPatterns': stats.get('suspiciousPatterns') or [],
+        'authorCount': stats.get('authorCount') or 0,
+        'commitsByDayOfWeek': stats.get('commitsByDayOfWeek') or {},
+        'commitsByHour': stats.get('commitsByHour') or {},
+        'readmeAnalysis': stats.get('readmeAnalysis') or {},
+        'repoMetadata': stats.get('repoMetadata') or {},
     }
 
 
 def build_roast_prompt(stats: Dict[str, Any]) -> str:
     """Build a comprehensive prompt for Gemini based on GitHub stats."""
+    # FIX: Handle None stats
+    if not stats:
+        stats = {}
+
     is_profile = stats.get('analysisType') == 'profile'
-    repo_info = stats.get('repositoryInfo', {})
-    
+    repo_info = stats.get('repositoryInfo') or {}
+
     # Build target label
+    # FIX: Handle None values in repo_info
     profile_label = f"@{repo_info.get('username')}'s GitHub profile" if repo_info.get('username') else 'this GitHub profile'
-    repo_label = repo_info.get('fullName') or (f"{repo_info.get('owner')}/{repo_info.get('repo')}" if repo_info.get('owner') and repo_info.get('repo') else 'this repository')
+    owner = repo_info.get('owner') or ''
+    repo = repo_info.get('repo') or ''
+    full_name = repo_info.get('fullName') or ''
+    repo_label = full_name or (f"{owner}/{repo}" if owner and repo else 'this repository')
     target = profile_label if is_profile else repo_label
-    
+
     # Distill stats
     distilled_stats = distill_stats_for_prompt(stats)
     
