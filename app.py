@@ -144,67 +144,70 @@ def roast_github_repo(url: str, progress=gr.Progress()) -> str:
         return f"## ❌ Error\n\n**Failed to analyze repository:**\n\n{error_msg}\n\nPlease check:\n- The repository/profile exists and is public\n- You haven't exceeded GitHub rate limits"
 
 
-# Create Gradio Interface with improved styling
-with gr.Blocks(title="GitRoast - Brutally Honest GitHub Analysis") as demo:
-    gr.Markdown("""
-    # 🔥 GitRoast - Brutally Honest GitHub Analysis
+# Create Gradio 6 Interface with MCP server support
+with gr.Blocks(
+    title="GitRoast - Brutally Honest GitHub Analysis",
+    fill_height=True
+) as demo:
+    gr.Markdown(
+        """# 🔥 GitRoast - Brutally Honest GitHub Analysis
 
-    **Get savagely roasted based on your commit history, documentation, and coding patterns.**
+**Get savagely roasted based on your commit history, documentation, and coding patterns.**
 
-    This MCP server analyzes GitHub repositories and profiles, then generates hilariously brutal (but constructive) feedback.
-    """)
+This MCP server analyzes GitHub repositories and profiles, then generates hilariously brutal (but constructive) feedback.""",
+        header_links=True
+    )
 
-    with gr.Row():
-        with gr.Column(scale=1):
-            gr.Markdown("""
-            ### 📊 What We Analyze
-            - Commit patterns & timing
-            - Message quality
-            - Documentation
-            - Repository metadata
-            - Coding habits
+    with gr.Row(equal_height=True):
+        with gr.Column(scale=1, min_width=280, variant="panel"):
+            gr.Markdown("""### 📊 What We Analyze
+- Commit patterns & timing
+- Message quality
+- Documentation
+- Repository metadata
+- Coding habits
 
-            ### 🎯 You'll Get
-            - Savage roasts
-            - Letter grade
-            - Embarrassing achievements
-            - Honest suggestions
-            """)
+### 🎯 You'll Get
+- Savage roasts
+- Letter grade
+- Embarrassing achievements
+- Honest suggestions""")
 
-        with gr.Column(scale=2):
+        with gr.Column(scale=2, min_width=400):
             url_input = gr.Textbox(
                 label="GitHub Repository or Username",
-                placeholder="Enter: owner/repo, https://github.com/owner/repo, or username",
+                placeholder="owner/repo, https://github.com/owner/repo, or username",
                 info="Examples: facebook/react, torvalds/linux, or octocat",
                 lines=1,
-                max_lines=1
+                max_lines=1,
+                autofocus=True,
+                submit_btn=True
             )
 
             analyze_btn = gr.Button(
-                "🔥 Roast This Repo!",
+                value="🔥 Roast This Repo!",
                 variant="primary",
-                size="lg",
-                scale=1
+                size="lg"
             )
 
-            gr.Markdown("""
-            <div style="text-align: center; margin-top: 10px; color: #666; font-size: 0.9em;">
-            ⚡ Analysis takes 10-30 seconds depending on repository size
-            </div>
-            """)
+            gr.Markdown(
+                "_⚡ Analysis takes 10-30 seconds depending on repository size_",
+                elem_classes=["text-center"]
+            )
 
     gr.Markdown("---")
 
     output = gr.Markdown(
-        label="Roast Results",
         value="👆 Enter a repository or username above and click the button to get roasted!",
-        elem_classes="output-container"
+        line_breaks=True,
+        header_links=True,
+        sanitize_html=True
     )
 
-    # Connect the function
+    # Connect the function with Gradio 6 event syntax
     analyze_btn.click(
         fn=roast_github_repo,
-        inputs=[url_input],
+        inputs=url_input,
         outputs=output,
         show_progress="full"
     )
@@ -212,26 +215,26 @@ with gr.Blocks(title="GitRoast - Brutally Honest GitHub Analysis") as demo:
     # Also allow Enter key to submit
     url_input.submit(
         fn=roast_github_repo,
-        inputs=[url_input],
+        inputs=url_input,
         outputs=output,
         show_progress="full"
     )
-    
-    gr.Markdown("""
-    ---
-    ### About
-    
-    Built for the **MCP 1st Birthday Hackathon (Track 1: Building MCP)**.
-    
-    This MCP server analyzes GitHub repositories and profiles, then generates hilariously brutal roasts based on:
-    - Commit message quality
-    - Coding schedule patterns (late night, weekend commits)
-    - Documentation completeness
-    - Repository metadata (description, topics, license)
-    - And much more!
-    
-    **Note:** This tool is for entertainment and educational purposes. The roasts are meant to be funny and constructive, not mean-spirited.
-    """)
+
+    gr.Markdown("""---
+### About
+
+Built for the **MCP 1st Birthday Hackathon (Track 1: Building MCP)**.
+
+This MCP server analyzes GitHub repositories and profiles, then generates hilariously brutal roasts based on:
+- Commit message quality
+- Coding schedule patterns (late night, weekend commits)
+- Documentation completeness
+- Repository metadata (description, topics, license)
+- And much more!
+
+**Note:** This tool is for entertainment and educational purposes. The roasts are meant to be funny and constructive, not mean-spirited.""",
+        line_breaks=True
+    )
 
 # Launch with MCP server mode
 if __name__ == "__main__":
