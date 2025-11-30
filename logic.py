@@ -1455,11 +1455,12 @@ def analyze_repo(url: str, github_token: Optional[str] = None, gemini_api_key: O
     # Add repository/profile info and stats to response
     roast_data['repository'] = git_stats.get('repositoryInfo', {})
     roast_data['analysisType'] = input_type['type']
+    roast_data['repoMetadata'] = git_stats.get('repoMetadata', {})
     roast_data['stats'] = {
         'totalCommits': git_stats.get('totalCommits', 0),
         'lateNightCommits': git_stats.get('lateNightCommits', 0),
         'lateNightPercentage': git_stats.get('lateNightPercentage', 0),
     }
-    
+
     return roast_data
 
