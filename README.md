@@ -7,7 +7,7 @@ sdk: gradio
 sdk_version: "6.0.0"
 app_file: app.py
 pinned: false
-short_description: Brutally roast GitHub repositories with AI-powered analysis and savage humor via MCP
+short_description: Brutally roast GitHub repos with savage humor
 tags:
   - mcp
   - building-mcp-track-creative
